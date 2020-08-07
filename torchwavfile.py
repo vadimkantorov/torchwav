@@ -14,7 +14,15 @@ def frombuffer(bytes, dtype, byte_order = 'native'):
 
 def tobytes(tensor):
     #data.ravel().view('b').data
-	return tensor.flatten().numpy().tobytes()
+    return tensor.flatten().numpy().tobytes()
+
+def kind(tensor):
+    integer = not tensor.is_floating_point()
+    signed = tensor.is_signed()
+    return 'i' if integer and signed else 'u' if integer and not signed else 'f'
+
+def itemsize(tensor):
+    return (torch.finfo if tensor.is_floating_point() else torch.iinfo)(tensor.dtype).bits // 8
 
 import io
 import sys
@@ -319,9 +327,9 @@ def write(filename, rate, data):
     fs = rate
 
     try:
-        dkind = data.dtype.kind
+        dkind = kind(data)
         if not (dkind == 'i' or dkind == 'f' or (dkind == 'u' and
-                                                 data.dtype.itemsize == 1)):
+                                                 itemsize(data) == 1)):
             raise ValueError("Unsupported data type '%s'" % data.dtype)
 
         header_data = b''
@@ -340,7 +348,7 @@ def write(filename, rate, data):
             channels = 1
         else:
             channels = data.shape[1]
-        bit_depth = data.dtype.itemsize * 8
+        bit_depth = itemsize(data) * 8
         bytes_per_second = fs*(bit_depth // 8)*channels
         block_align = channels * (bit_depth // 8)
 
