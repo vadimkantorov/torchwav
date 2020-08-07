@@ -7,7 +7,6 @@ Please refer or original docs for [read](https://docs.scipy.org/doc/scipy/refere
 **TODO**: fix byte_order, byteswap
 
 
-## Tests
 ### Create sample audio test.wav
 ```shell
 ffmpeg -f lavfi -i "sine=frequency=1000:duration=5" -c:a pcm_s16le -ar 8000 test.wav
