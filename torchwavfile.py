@@ -20,6 +20,7 @@ def nbytes(tensor):
 def byteorder(tensor):
     return '='
 ##################################
+# https://github.com/scipy/scipy/blob/dc0bb8b/scipy/io/wavfile.py
 
 import io
 import sys
