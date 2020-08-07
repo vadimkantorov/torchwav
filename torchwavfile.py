@@ -1,5 +1,6 @@
 ##################################
 import torch
+import ctypes
 def frombuffer(bytes, dtype):
     dtype2tensor = dict(i2 = torch.ShortTensor, f4 = torch.FloatTensor, u8 = torch.CharTensor)
     dtype2storage = dict(i2 = torch.ShortStorage, f4 = torch.FloatStorage, u8 = torch.CharStorage)
@@ -7,8 +8,7 @@ def frombuffer(bytes, dtype):
     dtype = dtype.strip('<=>')
     return dtype2tensor[dtype](dtype2storage[dtype].from_buffer(bytes, byte_order = byte_order))
 def tobytes(tensor):
-    #data.ravel().view('b').data
-    return tensor.flatten().numpy().tobytes()
+    return ctypes.cast(tensor.data_ptr(), ctypes.POINTER(ctypes.c_ubyte * nbytes(tensor))).contents
 def kind(tensor):
     integer = not tensor.is_floating_point()
     signed = tensor.is_signed()
@@ -318,6 +318,7 @@ def read(filename, mmap=False):
 
 
 def write(filename, rate, data):
+    data = data.contiguous()
     if hasattr(filename, 'write'):
         fid = filename
     else:
