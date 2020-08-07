@@ -4,10 +4,17 @@
 # mmap mode is not supported
 
 # simpler https://github.com/scipy/scipy/blob/v0.14.0/scipy/io/wavfile.py#L116
+# TODO: fix byte_order, byteswap
+
+import torch
+def frombuffer(bytes, dtype, byte_order = 'native'):
+    dtype2tensor = dict(int16 = torch.ShortTensor)
+    dtype2storage = dict(int16 = torch.ShortStorage)
+    return dtype2tensor[dtype](dtype2storage[dtype].from_buffer(bytes, byte_order = byte_order))
 
 import io
 import sys
-import numpy
+import torch
 import struct
 import warnings
 from enum import IntEnum
@@ -163,15 +170,14 @@ def _read_data_chunk(fid, format_tag, channels, bit_depth, is_big_endian,
 
     start = fid.tell()
     if not mmap:
-        try:
-            data = numpy.fromfile(fid, dtype=dtype, count=n_samples)
-        except io.UnsupportedOperation:  # not a C-like file
-            fid.seek(start, 0)  # just in case it seeked, though it shouldn't
-            data = numpy.frombuffer(fid.read(size), dtype=dtype)
+        #data = numpy.fromfile(fid, dtype=dtype, count=n_samples)
+        fid.seek(start, 0)  # just in case it seeked, though it shouldn't
+        data = frombuffer(fid.read(size), dtype=dtype)
     else:
-        data = numpy.memmap(fid, dtype=dtype, mode='c', offset=start,
-                            shape=(n_samples,))
-        fid.seek(start + size)
+        assert not mmap, 'mmap is not supported'
+        #data = numpy.memmap(fid, dtype=dtype, mode='c', offset=start,
+        #                    shape=(n_samples,))
+        #fid.seek(start + size)
 
     _handle_pad_byte(fid, size)
 
