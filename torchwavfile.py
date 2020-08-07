@@ -1,28 +1,25 @@
-# taken from https://github.com/scipy/scipy/blob/dc0bb8b/scipy/io/wavfile.py
-# read docs are at https://docs.scipy.org/doc/scipy/reference/generated/scipy.io.wavfile.read.html
-# write docs are at https://docs.scipy.org/doc/scipy/reference/generated/scipy.io.wavfile.write.html
-# mmap mode is not supported
-
-# simpler https://github.com/scipy/scipy/blob/v0.14.0/scipy/io/wavfile.py#L116
-# TODO: fix byte_order, byteswap
-
+##################################
 import torch
-def frombuffer(bytes, dtype, byte_order = 'native'):
-    dtype2tensor = dict(int16 = torch.ShortTensor)
-    dtype2storage = dict(int16 = torch.ShortStorage)
+def frombuffer(bytes, dtype):
+    dtype2tensor = dict(i2 = torch.ShortTensor, f4 = torch.FloatTensor, u8 = torch.CharTensor)
+    dtype2storage = dict(i2 = torch.ShortStorage, f4 = torch.FloatStorage, u8 = torch.CharStorage)
+    byte_order = {'<' : 'little', '>' : 'big'}.get(dtype[0], 'native')
+    dtype = dtype.strip('<=>')
     return dtype2tensor[dtype](dtype2storage[dtype].from_buffer(bytes, byte_order = byte_order))
-
 def tobytes(tensor):
     #data.ravel().view('b').data
     return tensor.flatten().numpy().tobytes()
-
 def kind(tensor):
     integer = not tensor.is_floating_point()
     signed = tensor.is_signed()
     return 'i' if integer and signed else 'u' if integer and not signed else 'f'
-
 def itemsize(tensor):
     return (torch.finfo if tensor.is_floating_point() else torch.iinfo)(tensor.dtype).bits // 8
+def nbytes(tensor):
+    return tensor.numel() * itemsize(tensor)
+def byteorder(tensor):
+    return '='
+##################################
 
 import io
 import sys
@@ -182,9 +179,11 @@ def _read_data_chunk(fid, format_tag, channels, bit_depth, is_big_endian,
 
     start = fid.tell()
     if not mmap:
-        #data = numpy.fromfile(fid, dtype=dtype, count=n_samples)
-        fid.seek(start, 0)  # just in case it seeked, though it shouldn't
-        data = frombuffer(fid.read(size), dtype=dtype)
+        #try:
+        #    data = fromfile(fid, dtype=dtype, count=n_samples)
+        #except io.UnsupportedOperation:  # not a C-like file
+            fid.seek(start, 0)  # just in case it seeked, though it shouldn't
+            data = frombuffer(fid.read(size), dtype=dtype)
     else:
         assert not mmap, 'mmap is not supported'
         #data = numpy.memmap(fid, dtype=dtype, mode='c', offset=start,
@@ -367,16 +366,17 @@ def write(filename, rate, data):
             header_data += struct.pack('<II', 4, data.shape[0])
 
         # check data size (needs to be immediately before the data chunk)
-        if ((len(header_data)-4-4) + (4+4+data.nbytes)) > 0xFFFFFFFF:
+        if ((len(header_data)-4-4) + (4+4+nbytes(data))) > 0xFFFFFFFF:
             raise ValueError("Data exceeds wave file size limit")
 
         fid.write(header_data)
 
         # data chunk
         fid.write(b'data')
-        fid.write(struct.pack('<I', data.nbytes))
-        if data.dtype.byteorder == '>' or (data.dtype.byteorder == '=' and
+        fid.write(struct.pack('<I', nbytes(data)))
+        if byteorder(data) == '>' or (byteorder(data) == '=' and
                                            sys.byteorder == 'big'):
+            assert False, 'big-endian is not supported'
             data = data.byteswap()
         _array_tofile(fid, data)
 
