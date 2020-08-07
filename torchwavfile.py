@@ -1,6 +1,7 @@
 # taken from https://github.com/scipy/scipy/blob/dc0bb8b/scipy/io/wavfile.py
 # read docs are at https://docs.scipy.org/doc/scipy/reference/generated/scipy.io.wavfile.read.html
 # write docs are at https://docs.scipy.org/doc/scipy/reference/generated/scipy.io.wavfile.write.html
+# mmap mode is not supported
 
 # simpler https://github.com/scipy/scipy/blob/v0.14.0/scipy/io/wavfile.py#L116
 
@@ -227,6 +228,8 @@ def _handle_pad_byte(fid, size):
 
 
 def read(filename, mmap=False):
+    assert mmap is False, 'mmap argument is not supported'
+                             
     if hasattr(filename, 'read'):
         fid = filename
         mmap = False
