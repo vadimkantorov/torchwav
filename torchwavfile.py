@@ -1,4 +1,5 @@
 # taken from https://github.com/scipy/scipy/blob/dc0bb8b/scipy/io/wavfile.py
+# simpler https://github.com/scipy/scipy/blob/v0.14.0/scipy/io/wavfile.py#L116
 
 """
 Module to read / write wav files using NumPy arrays
