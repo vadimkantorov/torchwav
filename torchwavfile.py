@@ -12,6 +12,10 @@ def frombuffer(bytes, dtype, byte_order = 'native'):
     dtype2storage = dict(int16 = torch.ShortStorage)
     return dtype2tensor[dtype](dtype2storage[dtype].from_buffer(bytes, byte_order = byte_order))
 
+def tobytes(tensor):
+    #data.ravel().view('b').data
+	return tensor.flatten().numpy().tobytes()
+
 import io
 import sys
 import torch
@@ -383,4 +387,4 @@ def write(filename, rate, data):
 
 def _array_tofile(fid, data):
     # ravel gives a c-contiguous buffer
-    fid.write(data.ravel().view('b').data)
+    fid.write(tobytes(data))
