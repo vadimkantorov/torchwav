@@ -12,10 +12,9 @@ def read(filename):
 
 def write(filename, rate, data):
     assert data.is_contiguous() and not data.is_floating_point()
-    itemsize = torch.iinfo(data.dtype).bits // 8
     with wave.open(filename, 'w') as w:
         w.setframerate(rate)
         w.setnchannels(data.shape[1] if data.ndim == 2 else 1)
         w.setnframes(data.shape[0])
-        w.setsampwidth(itemsize)
-        w.writeframes(ctypes.cast(data.data_ptr(), ctypes.POINTER(ctypes.c_ubyte * (data.numel() * itemsize))).contents)
+        w.setsampwidth(data.element_size())
+        w.writeframes(ctypes.cast(data.data_ptr(), ctypes.POINTER(ctypes.c_ubyte * (data.numel() * data.element_size()))).contents)
