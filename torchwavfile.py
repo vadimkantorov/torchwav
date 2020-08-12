@@ -8,15 +8,15 @@ def frombuffer(bytes, dtype):
     dtype = dtype.strip('<=>')
     return dtype2tensor[dtype](dtype2storage[dtype].from_buffer(bytes, byte_order = byte_order))
 def tobytes(tensor):
-    return ctypes.cast(tensor.data_ptr(), ctypes.POINTER(ctypes.c_ubyte * nbytes(tensor))).contents
+    return ctypes.cast(tensor.data_ptr(), ctypes.POINTER(ctypes.c_ubyte * (tensor.numel() * tensor.element_size()) )).contents
 def kind(tensor):
     integer = not tensor.is_floating_point()
     signed = tensor.is_signed()
     return 'i' if integer and signed else 'u' if integer and not signed else 'f'
 def itemsize(tensor):
-    return (torch.finfo if tensor.is_floating_point() else torch.iinfo)(tensor.dtype).bits // 8
+    return tensor.element_size()
 def nbytes(tensor):
-    return tensor.numel() * itemsize(tensor)
+    return tensor.numel() * tensor.element_size()
 def byteorder(tensor):
     return '='
 ##################################
