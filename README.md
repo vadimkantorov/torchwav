@@ -4,7 +4,7 @@ Read and write .WAV files in PyTorch without any dependencies via two methods:
 
 API for both methods follow the original `scipy.io.wavfile`, except that `mmap = True` is not supported. Reading directly from file to an array (via `fromfile`) is also not supported. Big-endian platforms are also not supported / tested.
 
-Please refer to original docs for [read](https://docs.scipy.org/doc/scipy/reference/generated/scipy.io.wavfile.read.html) and [write](https://docs.scipy.org/doc/scipy/reference/generated/scipy.io.wavfile.write.html).
+For API description of both methods, please refer to original docs for [`scipy.io.wavfile.read`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.io.wavfile.read.html) and [`scipy.io.wavfile.write`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.io.wavfile.write.html).
 
 ### Create sample audio test.wav
 ```shell
