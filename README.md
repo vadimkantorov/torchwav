@@ -1,6 +1,6 @@
 Read and write .WAV files in PyTorch without any dependencies via two methods:
 - wrapper of Python [`wave`](https://docs.python.org/3/library/wave.html) core module in [torchwave.py](./torchwave.py)
-- adaptation of [`scipy.io.wavfile`](https://github.com/scipy/scipy/blob/dc0bb8b/scipy/io/wavfile.py) in [torchwavefile.py](./torchwavefile.py)
+- adaptation of [`scipy.io.wavfile`](https://github.com/scipy/scipy/blob/dc0bb8b/scipy/io/wavfile.py) in [torchwavfile.py](./torchwavfile.py)
 
 API for both methods follow the original `scipy.io.wavfile`, except that `mmap = True` is not supported. Reading directly from file to an array (via `fromfile`) is also not supported. Big-endian platforms are also not supported / tested.
 
